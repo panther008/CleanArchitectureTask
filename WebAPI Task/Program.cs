@@ -4,20 +4,27 @@ using Domain;
 using Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using Models;
-using System.Reflection;
 using WebAPI_Task.Middlewares;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
-
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+
+// Configure Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<SignUpCommand>());
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<BalanceCommand>());
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblyContaining<AuthenticateCommand>());
+
+// Register MediatR for command handling
+builder.Services.AddMediatR(cfg =>
+{
+    // Register all commands from the current assembly
+    cfg.RegisterServicesFromAssemblyContaining<SignUpCommand>();
+    cfg.RegisterServicesFromAssemblyContaining<BalanceCommand>();
+    cfg.RegisterServicesFromAssemblyContaining<AuthenticateCommand>();
+});
+
+// Register application services
 builder.Services.AddScoped<AppDbContext>(provider =>
 {
     var configuration = provider.GetRequiredService<IConfiguration>();
@@ -25,11 +32,11 @@ builder.Services.AddScoped<AppDbContext>(provider =>
     return new AppDbContext(connectionString);
 });
 
-// Register IUserRepository and its implementation
+// Register repository and service implementations
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
-builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<IJwtTokenService, JwtTokenService>();
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -40,7 +47,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 app.UseAuthorization();
 app.UseMiddleware<ErrorHandlerMiddleware>();
 app.MapControllers();
