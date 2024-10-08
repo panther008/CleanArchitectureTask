@@ -49,13 +49,7 @@ namespace Application.Command
             };
         }
 
-        //private string GetUsernameFromToken(string token)
-        //{
-        //    var tokenHandler = new JwtSecurityTokenHandler();
-        //    var jwtToken = tokenHandler.ReadJwtToken(token);
-        //    var username = jwtToken.Claims.First(claim => claim.Type == ClaimTypes.Name).Value;
-        //    return username;
-        //}
+       
         public ClaimsPrincipal GetClaimsFromToken(string token)
         {
             var handler = new JwtSecurityTokenHandler();
